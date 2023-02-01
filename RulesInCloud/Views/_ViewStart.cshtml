@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="google" value="notranslate">
+  <title>Rules In Cloud</title>
+  <link rel="stylesheet" href="demos/code/style.css">
+  <script src="~/blockly_beautified.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"> 
+  <script src="~/blocks/colour.js"></script>
+  <script src="~/blocks/lists.js"></script>
+  <script src="~/blocks/logic.js"></script>
+  <script src="~/blocks/loops.js"></script>
+  <script src="~/blocks/math.js"></script>
+  <script src="~/blocks/procesures.js"></script>
+  <script src="~/blocks/text.js"></script>
+  <script src="~/blocks/variables.js"></script>
+  <script src="~/javascript_compressed.js"></script>
+  <script src="~/generators/csharp.js"></script>
+  <script src="~/generators/csharp/colour.js"></script>
+  <script src="~/generators/csharp/lists.js"></script>
+  <script src="~/generators/csharp/logic.js"></script>
+  <script src="~/generators/csharp/loops.js"></script>
+  <script src="~/generators/csharp/math.js"></script>
+  <script src="~/generators/csharp/procedures.js"></script>
+  <script src="~/generators/csharp/text.js"></script>
+  <script src="~/generators/csharp/variables.js"></script>
+
+  <script type="text/javascript" src="~/demos/code/blockly_helper.js"></script>
+  <script src="~/jquery-2.1.3.min.js"></script>
+  <script src ="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"> </script> 
+  <script src="~/code.js"></script>
+  <script  type="text/javascript">
+        function init() {
+            // Init load event.
+            var loadInput = document.getElementById('load');
+            loadInput.addEventListener('change', load, false);
+
+            document.getElementById('fakeload').onclick = function() {
+                loadInput.click();
+            };
+        }
+        $( document ).ready(function() {
+            init();
+            loadAllValues();
+        });
+        window.addEventListener('load', auto_save_and_restore_blocks);
+    </script>
+
+    <style>
+        #main_search {
+            display:table;
+            width:100%;
+            border-collapse: separate;
+        }   
+        #input_run {
+            display:table-cell;
+            width:33%;
+        }
+        #runButton {
+            display:table-cell;
+            height: 50px;
+            padding: 5px;
+            vertical-align: middle;
+            margin-bottom: 40%;
+            margin-left:1%;
+            margin-right:1%;
+            width:8%;
+        }
+        #output_run {
+            display:table-cell;
+            width:34%;
+        }
+    </style>
+</head>
+<body>
+  <table width="100%" height="100%">
+    <tr>
+      <td>
+        <h1>
+          <span id="editorTitle">Rules in Cloud</span>
+          <span id="title" style="display: none;">...</span>
+        </h1>
+      </td>
+    </tr>
+    <tr>
+      <td colspan=2>
+        <table width="100%">
+          <tr id="tabRow" height="1em">
+            <td id="tab_blocks" class="tabon">...</td>
+			<td class="tabmin">&nbsp;</td>
+            <td id="tab_xml" style="display: none;" class="taboff">XML</td>
+            <td class="tabmin">&nbsp;</td>
+            <td id="tab_csharp" class="taboff">Rule</td>
+            <td class="tabmin">&nbsp;</td>
+            <td id="tab_test" class="taboff">Test</td>
+            <td class="tabmax">
+              <button class="btn" onclick="save()" id="saveBtn">Save Block</button>
+              <button id="fakeload" style="display: none;">Load Block</button>
+              <input type="file" id="load" style="display: none;"/>
+              <button id="loadDB" data-target="#myModal" role="button" class="btn" data-toggle="modal" onclick="loadAllValues()">Load Block</button>
+            </td>
+            <td>
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h3 id="myModalLabel">Select the block name from the below drop down</h3>
+                            </div>
+                        <div class="modal-body">
+                            <select id="loadAllValues"> </select>
+                        </div>
+                        <div class="modal-footer"> 
+                            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                            <button class="btn btn-primary" onclick="loadSelectedBlock()" data-dismiss="modal" aria-hidden="true">Load Block</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td height="99%" colspan=2 id="content_area">
+      </td>
+    </tr>
+  </table>
+  <div id="content_blocks" class="content"></div>
+  <pre id="content_csharp" class="content"></pre>
+  <div id="content_test" class="content">
+     <div id="main_search">
+        <textarea id="input_run" rows=25   style="max-height:40%;" placeholder="input" ></textarea>
+        <button id="runButton" class="notext primary" title="..." onclick="testRun()">
+            <img src='../../media/1x1.gif' class="run icon21">
+        </button>
+         <textarea id="output_run" rows=25 style="max-height:40%;" placeholder="output" readonly></textarea>
+      </div>
+  </div>
+  <textarea id="content_xml" class="content" wrap="off"></textarea>
+
+  <xml id="toolbox" style="display: none">
+    <category id="catRule">
+      <block type="colour_rgb">
+        <value name="WORKFLOWNAME">
+          <block type="text"></block>
+        </value>
+      </block>
+      <block type="colour_blend">
+        <value name="RULENAME">
+          <block type="text"></block>
+        </value>
+        <value name="OPERATOR">
+          <block type="colour_picker"></block>
+        </value>
+        <value name="SUCCESSEVENT">
+          <block type="text"></block>
+        </value>
+        <value name="ERRORMESSAGE">
+          <block type="text"></block>
+        </value>
+        <value name="EXPRESSION">
+          <block type="logic_boolean"></block>
+        </value>
+      </block>
+      <block type="colour_picker"></block>
+    </category>
+    <category id="catVariables" custom="VARIABLE"></category>
+    <category id="catLogic">
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_negate"></block>
+      <block type="logic_boolean"></block>
+    </category>
+    <category id="catMath">
+      <block type="math_number"></block>
+    </category>
+    <category id="catText">
+      <block type="text"></block>
+    </category>
+  </xml>
+
+</body>
+</html>
