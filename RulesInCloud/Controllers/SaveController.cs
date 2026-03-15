@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using RulesInCloud.Models;
 using RulesInCloud.Repositories;
 using System.Threading.Tasks;
@@ -8,9 +9,12 @@ namespace RulesInCloud.Controllers
     public class SaveController : Controller
     {
         private readonly XmlDataRepository xmlDataRepository;
-        public SaveController(XmlDataRepository xmlDataRepository)
+        private readonly ILogger<SaveController> _logger;
+
+        public SaveController(XmlDataRepository xmlDataRepository, ILogger<SaveController> logger)
         {
             this.xmlDataRepository = xmlDataRepository;
+            _logger = logger;
         }
 
         [Route("savexml")]
@@ -18,13 +22,17 @@ namespace RulesInCloud.Controllers
         public async Task<ActionResult> SaveXML([FromBody] InputRequestModel input)
         {
             if (input == null || string.IsNullOrWhiteSpace(input.name) || string.IsNullOrWhiteSpace(input.value))
-                return NotFound();
+                return BadRequest(new ErrorModel { ErrorMessage = "name and value are required." });
 
             XMLData data = await xmlDataRepository.GetXmlDataByName(input.name);
-            if (data == null)
+            if (data != null)
             {
-                await xmlDataRepository.SaveXMLData(input.name, input.value);
+                _logger.LogWarning("Rule '{Name}' already exists; skipping save.", input.name);
+                return Conflict(new ErrorModel { ErrorMessage = $"A rule named '{input.name}' already exists." });
             }
+
+            await xmlDataRepository.SaveXMLData(input.name, input.value);
+            _logger.LogInformation("Saved rule '{Name}'.", input.name);
             return Ok();
         }
     }
