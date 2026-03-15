@@ -358,7 +358,7 @@ Code.runJS = function() {
     eval(code);
   } catch (e) {
     alert(MSG['badCode'].replace('%1', e));
-  }bindClick
+  }
 };
 
 /**
@@ -386,13 +386,16 @@ function loadAllValues() {
         url: '/load',
         type: 'GET',
         success: function (response) {
-            if ($('#loadAllValues').size() < response.length) {
-                removeOptions(document.getElementById('loadAllValues'));
+            var select = document.getElementById('loadAllValues');
+            if (select.options.length < response.length) {
+                removeOptions(select);
                 for (let i in response) {
-                    $("#loadAllValues").append("<option>" + response[i] + "</option>");
-
+                    $('<option>').text(response[i]).appendTo('#loadAllValues');
                 }
             }
+        },
+        error: function () {
+            console.error('Failed to load rules. Please try again later.');
         }
     });
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using RulesEngine.Models;
@@ -13,9 +14,12 @@ namespace RulesInCloud.Controllers
     public class TestController : Controller
     {
         private readonly ExpandoObjectConverter expandObject;
-        public TestController()
+        private readonly ILogger<TestController> _logger;
+
+        public TestController(ILogger<TestController> logger)
         {
             expandObject = new ExpandoObjectConverter();
+            _logger = logger;
         }
 
         [Route("testData")]
@@ -23,7 +27,7 @@ namespace RulesInCloud.Controllers
         public ActionResult TestData([FromBody] TestRequestModel requestModel)
         {
             if (requestModel == null || string.IsNullOrWhiteSpace(requestModel.ruleData) || string.IsNullOrWhiteSpace(requestModel.input))
-                return NotFound();
+                return BadRequest(new ErrorModel { ErrorMessage = "ruleData and input are required." });
 
             try
             {
@@ -45,17 +49,13 @@ namespace RulesInCloud.Controllers
                 if (list.Count > 0)
                     return Ok(list);
             }
-            catch (Exception ex){
-                return Ok(new ErrorModel
-                {
-                    ErrorMessage = ex.Message
-                });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing rules");
+                return StatusCode(500, new ErrorModel { ErrorMessage = ex.Message });
             }
 
-            return Ok(new ErrorModel
-            {
-                ErrorMessage =  "No matching rules"
-            });
+            return Ok(new ErrorModel { ErrorMessage = "No matching rules" });
         }
     }
 }
